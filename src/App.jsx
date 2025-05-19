@@ -8,36 +8,34 @@ import ProductList from './components/ProductList';
 import AddProduct from './components/AddProduct';
 import UpdateProduct from './components/UpdateProduct';
 import NavBar from './components/Navbar';
-// import UpdateProduct from './components/UpdateProduct';
+import { CartProvider } from './components/CartContext';
 
 function App() {
   return (
     <>
-      <NavBar />
-      <Router>
-        <Routes>
-          <Route
-            path="/"
-            element={<Home />}
-          />
-          <Route
-            path="/products"
-            element={<ProductList />}
-          />
-          <Route
-            path="/products/:id"
-            element={<ProductDetails />}
-          />
-          <Route
-            path="/addproduct"
-            element={<AddProduct />}
-          />
-          <Route
-            path="/updateproduct"
-            element={<UpdateProduct />}
-          />
-        </Routes>
-      </Router>
+      <CartProvider>
+        <NavBar />
+        <Router>
+          <Routes>
+            <Route
+              path="/"
+              element={<Home />}
+            />
+            <Route
+              path="/products"
+              element={<ProductList />}
+            />
+            <Route
+              path="/products/:id"
+              element={<ProductDetails />}
+            />
+            <Route
+              path="/addproduct"
+              element={<AddProduct />}
+            />
+          </Routes>
+        </Router>
+      </CartProvider>
     </>
   );
 }

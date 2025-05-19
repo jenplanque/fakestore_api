@@ -5,7 +5,9 @@ import Button from 'react-bootstrap/Button';
 import Card from 'react-bootstrap/Card';
 import Container from 'react-bootstrap/Container';
 import Alert from 'react-bootstrap/Alert';
-// import UpdateProduct from './UpdateProduct';
+import Form from 'react-bootstrap/Form';
+import './ProductDetails.css';
+import { useCart } from '../components/CartContext';
 
 function ProductDetails() {
   const { id } = useParams();
@@ -13,44 +15,31 @@ function ProductDetails() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [deleted, setDeleted] = useState(false);
-  const [updated, setUpdated] = useState(false);
+  const [showUpdateForm, setShowUpdateForm] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [cartMsg, setCartMsg] = useState('');
+  const [formData, setFormData] = useState({
+    title: '',
+    description: '',
+    category: '',
+    price: '',
+    image: '',
+  });
 
-  const deleteProduct = () => {
-    axios
-      .delete(`https://fakestoreapi.com/products/${id}`)
-      .then(() => {
-        setDeleted(true);
-        console.log('Product ' + id + ' has been deleted.');
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  };
-
-  const updateProduct = () => {
-    axios
-      .put(`https://fakestoreapi.com/products/${id}`, {
-        title: product.title + ' (Updated)',
-        price: product.price,
-        description: product.description,
-        image: product.image,
-        category: product.category,
-      })
-      .then((response) => {
-        setProduct(response.data);
-        setUpdated(true);
-        setTimeout(() => setUpdated(false), 2000); 
-      })
-      .catch(() => {
-        setError('Failed to update product.');
-      });
-  };
+  const { addToCart } = useCart();
 
   useEffect(() => {
     axios
       .get(`https://fakestoreapi.com/products/${id}`)
       .then((response) => {
         setProduct(response.data);
+        setFormData({
+          title: response.data.title || '',
+          description: response.data.description || '',
+          category: response.data.category || '',
+          price: response.data.price || '',
+          image: response.data.image || '',
+        });
         setLoading(false);
       })
       .catch(() => {
@@ -59,38 +48,275 @@ function ProductDetails() {
       });
   }, [id]);
 
-  if (loading) return <p>Loading products...</p>;
-  if (error) return <p>{error}</p>;
+  const deleteProduct = () => {
+    axios
+      .delete(`https://fakestoreapi.com/products/${id}`)
+      .then(() => {
+        setDeleted(true);
+      })
+      .catch(() => {
+        setError('Failed to delete product.');
+      });
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+  };
+
+  const handleUpdateSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.patch(
+        `https://fakestoreapi.com/products/${id}`,
+        formData
+      );
+      setProduct(response.data);
+      setSubmitted(true);
+      setShowUpdateForm(false);
+    } catch (error) {
+      setError(`Error updating product. Please try again: ${error.message}`);
+    }
+  };
+
+  const handleAddToCart = () => {
+    addToCart(product);
+    setCartMsg('Item added to cart!');
+    setTimeout(() => setCartMsg(''), 2000);
+  };
+
+  if (loading) return <p>Loading product...</p>;
+  if (error) return <Alert variant="danger">{error}</Alert>;
   if (deleted)
     return (
-      <Alert variant="success">Product has been deleted successfully!</Alert>
+      <Container>
+        <Alert
+          variant="success"
+          className="mt-5"
+        >
+          Product has been deleted successfully!
+        </Alert>
+      </Container>
     );
 
+  // Show confirmation box after update
+  if (submitted && product) {
+    return (
+      <Container>
+        <Card className="details-card mx-auto my-5">
+          <Card.Img
+            className="details-image"
+            variant="top"
+            src={product.image}
+            alt={product.title}
+          />
+          <Card.Body>
+            <Card.Title className="details-title">{product.title}</Card.Title>
+            <Card.Text className="details-description">
+              {product.description}
+            </Card.Text>
+            <div className="details-meta">
+              <span className="details-category">{product.category}</span>
+              <span className="details-price">${product.price}</span>
+            </div>
+            <Alert
+              variant="success"
+              className="mt-3"
+            >
+              Product updated successfully!
+            </Alert>
+            {cartMsg && (
+              <Alert
+                variant="success"
+                className="mt-3"
+                onClose={() => setCartMsg('')}
+                dismissible
+              >
+                {cartMsg}
+              </Alert>
+            )}
+            <div className="details-actions mt-4">
+              <Button
+                className="details-btn me-2"
+                onClick={handleAddToCart}
+              >
+                Add to Cart
+              </Button>
+              <Button
+                className="details-btn details-btn-secondary me-2"
+                onClick={() => {
+                  setShowUpdateForm(true);
+                  setSubmitted(false);
+                  setFormData({
+                    title: product.title || '',
+                    description: product.description || '',
+                    category: product.category || '',
+                    price: product.price || '',
+                    image: product.image || '',
+                  });
+                }}
+              >
+                Update Product
+              </Button>
+              <Button
+                className="details-btn details-btn-danger"
+                onClick={deleteProduct}
+              >
+                Delete Product
+              </Button>
+            </div>
+          </Card.Body>
+        </Card>
+      </Container>
+    );
+  }
+
+  // Show update form if requested
+  if (showUpdateForm) {
+    return (
+      <Container className="mt-5">
+        <Card className="details-card mx-auto my-5">
+          <Card.Body>
+            <h2 className="details-title mb-4">Update Product</h2>
+            <Form onSubmit={handleUpdateSubmit}>
+              <Form.Group className="mb-3">
+                <Form.Label>Title</Form.Label>
+                <Form.Control
+                  type="text"
+                  placeholder="Enter a title"
+                  name="title"
+                  value={formData.title}
+                  onChange={handleChange}
+                  required
+                />
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>Description</Form.Label>
+                <Form.Control
+                  type="text"
+                  placeholder="Enter a description"
+                  name="description"
+                  value={formData.description}
+                  onChange={handleChange}
+                  required
+                />
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>Category</Form.Label>
+                <Form.Control
+                  type="text"
+                  placeholder="Enter a category"
+                  name="category"
+                  value={formData.category}
+                  onChange={handleChange}
+                  required
+                />
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>Price</Form.Label>
+                <Form.Control
+                  type="text"
+                  placeholder="Enter a price"
+                  name="price"
+                  value={formData.price}
+                  onChange={handleChange}
+                  required
+                />
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>Image</Form.Label>
+                <Form.Control
+                  type="text"
+                  placeholder="Enter an image url"
+                  name="image"
+                  value={formData.image}
+                  onChange={handleChange}
+                  required
+                />
+              </Form.Group>
+              <div className="details-actions mt-4">
+                <Button
+                  className="details-btn me-2"
+                  type="submit"
+                >
+                  Submit
+                </Button>
+                <Button
+                  className="details-btn details-btn-secondary"
+                  type="button"
+                  onClick={() => setShowUpdateForm(false)}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </Form>
+          </Card.Body>
+        </Card>
+      </Container>
+    );
+  }
+
+  // Show product card
   return (
     <Container>
-      {updated && (
-        <Alert variant="info">Product has been updated successfully!</Alert>
-      )}
-      <Card className="product-card">
+      <Card className="details-card mx-auto my-5">
         <Card.Img
-          className="product-image"
+          className="details-image"
           variant="top"
           src={product.image}
           alt={product.title}
         />
         <Card.Body>
-          <Card.Title>{product.title}</Card.Title>
-          <Card.Text>{product.description}</Card.Text>
-          <Card.Text>${product.price}</Card.Text>
-          <Card.Text>{product.category}</Card.Text>
-          <Button className="mx-2">Add to Cart</Button>
-          <Button
-            className="mx-2"
-            onClick={updateProduct}
-          >
-            Update Product
-          </Button>
-          <Button onClick={deleteProduct}>Delete Product</Button>
+          <Card.Title className="details-title">{product.title}</Card.Title>
+          <Card.Text className="details-description">
+            {product.description}
+          </Card.Text>
+          <div className="details-meta">
+            <span className="details-category">{product.category}</span>
+            <span className="details-price">${product.price}</span>
+          </div>
+          {cartMsg && (
+            <Alert
+              variant="success"
+              className="mt-3"
+              onClose={() => setCartMsg('')}
+              dismissible
+            >
+              {cartMsg}
+            </Alert>
+          )}
+          <div className="details-actions mt-4">
+            <Button
+              className="details-btn me-2"
+              onClick={handleAddToCart}
+            >
+              Add to Cart
+            </Button>
+            <Button
+              className="details-btn details-btn-secondary me-2"
+              onClick={() => {
+                setShowUpdateForm(true);
+                setFormData({
+                  title: product.title || '',
+                  description: product.description || '',
+                  category: product.category || '',
+                  price: product.price || '',
+                  image: product.image || '',
+                });
+              }}
+            >
+              Update Product
+            </Button>
+            <Button
+              className="details-btn details-btn-danger"
+              onClick={deleteProduct}
+            >
+              Delete Product
+            </Button>
+          </div>
         </Card.Body>
       </Card>
     </Container>
