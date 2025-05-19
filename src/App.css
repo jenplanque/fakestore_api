@@ -5,6 +5,26 @@
   text-align: center;
 }
 
+.navbar {
+  background-color: #f8f9fa;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5em 2em;
+}
+
+.navbar-brand {
+  text-align: left;
+}
+
+.navbar-links {
+  margin-left: auto;
+  display: flex;
+  gap: 1em;
+  align-items: center;
+}
+
 .logo {
   height: 6em;
   padding: 1.5em;
