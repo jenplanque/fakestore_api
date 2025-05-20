@@ -57,7 +57,7 @@ This project is a modern, responsive e-commerce front-end built with React, inte
 
 ## Project Structure
 
-![Project Structure](./public/project_structure.png)
+![Project Structure](./public/Project_Structure.png)
 
 ---
 
@@ -126,9 +126,6 @@ This project is a modern, responsive e-commerce front-end built with React, inte
 - **Update Product**  
   ![Update 1](./public/Update-Product-1.png)
   ![Update 2](./public/Update-Product-2.png)
-
-- **Add to Cart**  
-  ![Add to Cart](./public/NavBar.png)
 
 ---
 
