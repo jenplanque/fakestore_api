@@ -9,6 +9,41 @@ import Form from 'react-bootstrap/Form';
 import './ProductDetails.css';
 import { useCart } from '../components/CartContext';
 
+function renderStars(rate) {
+  const stars = [];
+  for (let i = 1; i <= 5; i++) {
+    if (rate >= i) {
+      stars.push(
+        <img
+          key={i}
+          src="/star-full.svg"
+          alt="★"
+          className="star-icon"
+        />
+      );
+    } else if (rate >= i - 0.5) {
+      stars.push(
+        <img
+          key={i}
+          src="/star-half.svg"
+          alt="☆"
+          className="star-icon"
+        />
+      );
+    } else {
+      stars.push(
+        <img
+          key={i}
+          src="/star-empty.svg"
+          alt="☆"
+          className="star-icon"
+        />
+      );
+    }
+  }
+  return stars;
+}
+
 function ProductDetails() {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
@@ -122,6 +157,24 @@ function ProductDetails() {
               <span className="details-category">{product.category}</span>
               <span className="details-price">${product.price}</span>
             </div>
+            <div className="details-rating mt-2">
+              <span className="details-rating-label">Rating:</span>
+              <span className="details-rating-stars">
+                {renderStars(product.rating?.rate)}
+                <span className="details-rating-score ms-2">
+                  {product.rating?.rate?.toFixed(1)}
+                </span>
+              </span>
+              <span className="details-rating-count ms-3">
+                ({product.rating?.count} ratings)
+              </span>
+              <a
+                href="#"
+                className="details-read-reviews ms-3"
+              >
+                Read Reviews
+              </a>
+            </div>
             <Alert
               variant="success"
               className="mt-3"
@@ -174,7 +227,7 @@ function ProductDetails() {
     );
   }
 
-  // Show update form if requested
+  // Show update form if clicked
   if (showUpdateForm) {
     return (
       <Container className="mt-5">
@@ -277,6 +330,24 @@ function ProductDetails() {
           <div className="details-meta">
             <span className="details-category">{product.category}</span>
             <span className="details-price">${product.price}</span>
+          </div>
+          <div className="details-rating mt-2">
+            <span className="details-rating-label">Rating:</span>
+            <span className="details-rating-stars">
+              {renderStars(product.rating?.rate)}
+              <span className="details-rating-score ms-2">
+                {product.rating?.rate?.toFixed(1)}
+              </span>
+            </span>
+            <span className="details-rating-count ms-3">
+              ({product.rating?.count} ratings)
+            </span>
+            <a
+              href="#"
+              className="details-read-reviews ms-3"
+            >
+              Read Reviews
+            </a>
           </div>
           {cartMsg && (
             <Alert

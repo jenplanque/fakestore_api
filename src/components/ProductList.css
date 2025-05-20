@@ -41,3 +41,35 @@
   transform: translateY(-2px) scale(1.03);
   text-decoration: none;
 }
+
+.star-icon {
+  width: 20px;
+  height: 20px;
+  margin-right: 2px;
+  vertical-align: middle;
+}
+
+.details-rating-label {
+  font-weight: 500;
+  margin-right: 6px;
+}
+
+.details-rating-score {
+  font-weight: 500;
+  color: #5f72bd;
+}
+
+.details-rating-count {
+  color: #888;
+  font-size: 0.95em;
+}
+
+.details-read-reviews {
+  color: #5f72bd;
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 0.97em;
+}
+.details-read-reviews:hover {
+  color: #9a8c98;
+}
